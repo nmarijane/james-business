@@ -1,85 +1,130 @@
 # James Business
 
-A French-speaking co-founder / business analyst agent for [Claude Code](https://claude.com/claude-code). Analyzes startup ideas with structured frameworks (TAM/SAM/SOM, Porter's Five Forces, financial modeling, team composition) by invoking skills from the `startup-business-analyst` companion plugin.
+Un agent Claude Code — co-fondateur / analyste business en français décontracté — qui analyse le potentiel d'une idée de startup avec des frameworks structurés (TAM/SAM/SOM, Porter's Five Forces, cohort-based financial modeling, unit economics, team composition).
 
-- **Verdict direct** : GO / PIVOT / NO-GO, sans complaisance.
-- **Deux modes** : rapide (web search + opinion) ou deep-dive (frameworks structurés).
-- **Français décontracté** : pas de jargon consultant, pas de buzzwords, pas de "Excellente question !".
+**Auto-suffisant :** le package installe l'agent + ses 5 skills compagnons. Pas de plugin externe à configurer.
+
+## Ce que fait James
+
+- **Mode rapide** : tu lui soumets une idée, il te renvoie en une page un verdict GO / PIVOT / NO-GO avec problème, marché, concurrents, viabilité.
+- **Mode deep-dive** : tu lui demandes "creuse" ou tu parles d'une levée → il enchaîne systématiquement TAM/SAM/SOM triangulé, Porter's Five Forces, Blue Ocean, financial model 3-5 ans, scénarios base/upside/downside, hiring plan aligné sur milestones.
+- **Mode conversationnel** : sparring partner — il challenge, pose des contre-exemples, propose des pivots.
+
+Le tout en français, décontracté, sans "Excellente question !" ni buzzwords corporate.
 
 ## Install
 
-### User scope (available in every project)
+### Portée utilisateur (dispo dans tous tes projets)
 
 ```bash
 npx @nmarijane/james-business
 ```
 
-### Project scope (this repo only)
+### Portée projet (ce repo uniquement)
 
 ```bash
 npx @nmarijane/james-business --project
 ```
 
-Installs the agent file into:
-- user scope → `~/.claude/agents/james-business.md`
-- project scope → `./.claude/agents/james-business.md`
-
-### Companion plugin (required for deep-dive rigor)
-
-In Claude Code:
+### Ce qui est installé
 
 ```
-/plugin marketplace add claude-code-workflows
-/plugin install startup-business-analyst@claude-code-workflows
+.claude/
+├── agents/
+│   └── james-business.md
+└── skills/
+    ├── james-market-sizing/SKILL.md
+    ├── james-competitive-landscape/SKILL.md
+    ├── james-financial-modeling/SKILL.md
+    ├── james-metrics-framework/SKILL.md
+    └── james-team-composition/SKILL.md
 ```
 
-This provides the 5 skills James calls:
+Au scope utilisateur, tout va dans `~/.claude/`. Au scope projet, dans `./.claude/` du cwd.
 
-| Skill | What it does |
-|---|---|
-| `market-sizing-analysis` | TAM/SAM/SOM via top-down, bottom-up, value theory |
-| `competitive-landscape` | Porter's Five Forces, Blue Ocean, positioning maps |
-| `startup-financial-modeling` | 3–5 year revenue/cost/cash-flow models with scenarios |
-| `startup-metrics-framework` | CAC / LTV / burn multiple / SaaS metrics benchmarks |
-| `team-composition-analysis` | Headcount, comp and equity by startup stage |
+**Pas de commande `/plugin` à lancer après.** C'est fini.
 
-Without the plugin, James still works in *mode dégradé* (web search only) and signals it explicitly in his answer.
+## Utilisation
 
-## Usage
-
-In Claude Code:
+Dans Claude Code :
 
 ```
 Agent({ subagent_type: "James Business", prompt: "Analyse mon idée : ..." })
 ```
 
-Or, depending on your interface, `@James Business ...`.
+Ou, selon ton interface, `@James Business ...`.
 
-### Mode rapide (default)
-
-Submit an idea in plain French:
+### Exemple — mode rapide
 
 > Analyse mon idée : une app qui booke des créneaux de padel entre amis avec split payment automatique.
 
-James will web-search the market, scan competitors, judge the moat and deliver a 1-page verdict with a pivot if the direct idea is weak.
+James web-search le marché, scan les concurrents (Doodle, Matchi, MeetUp…), juge le moat, et te sort un verdict d'une page avec un pivot si l'idée directe est faible.
 
-### Mode deep-dive
+### Exemple — mode deep-dive
 
-Trigger with explicit keywords (*creuse*, *analyse complète*, *deep-dive*, *détaille*) or when James proposes it:
+> Creuse pour une levée de 500K€.
 
-> Creuse pour une levée de 500K.
+Il enchaîne :
+- Invoque `james-market-sizing` → TAM/SAM/SOM triangulé top-down + bottom-up
+- Invoque `james-competitive-landscape` → Porter's Five Forces + positioning map + moat
+- Invoque `james-financial-modeling` → cohort-based projection 3-5 ans + runway + sizing de levée
+- Invoque `james-team-composition` → hiring plan aligné sur les milestones
+- Tranche avec un verdict opinionné
 
-He will invoke the plugin skills systematically and output TAM/SAM/SOM, Porter's Five Forces, financial model, team plan, risks and next steps — all synthesized in his own French voice.
+Tout synthétisé dans son style à lui — pas de copier-coller brut de skills.
 
-## What's in the box
+## Les 5 skills compagnons
+
+Chaque skill est un framework structuré en français, calibré sur la procédure de James :
+
+| Skill | Ce qu'il fait |
+|---|---|
+| `james-market-sizing` | TAM/SAM/SOM via top-down, bottom-up, value theory, avec triangulation et benchmarks |
+| `james-competitive-landscape` | Porter's Five Forces, Blue Ocean Strategy, positioning maps, scan GitHub/PH/HN/Reddit |
+| `james-financial-modeling` | Revenue cohort-based, COGS, opex, burn, runway, 3 scénarios, sizing de levée |
+| `james-metrics-framework` | North Star Metric, AARRR, CAC/LTV/NRR/Burn Multiple par stade et par business model |
+| `james-team-composition` | Hiring plan par stade, comp ranges (Paris/remote EU/SF), equity, budget vs milestones |
+
+Les skills sont invocables **indépendamment** de l'agent — si tu veux juste un TAM/SAM sans le persona, tu peux lancer directement `Skill({ skill: "james-market-sizing", ... })`.
+
+## Philosophie
+
+- **Pas de complaisance** : si une idée est nulle, James le dit — mais propose toujours un pivot.
+- **Rigueur chiffrée** : en deep-dive, les skills produisent des fourchettes défendables avec sources.
+- **Pas de buzzwords** : pas de "leveraging synergies" ni de "disrupting the market".
+- **Triangulation** : jamais un chiffre unique, toujours au moins 2 méthodes pour cross-checker.
+
+## Structure du repo
 
 ```
 .
 ├── agents/
-│   └── james-business.md   # persona + procedures + skill wiring
-├── install.js              # the bin script (copy + detect plugin + instructions)
+│   └── james-business.md     # persona + procédures + wiring aux skills
+├── skills/
+│   ├── james-market-sizing/
+│   ├── james-competitive-landscape/
+│   ├── james-financial-modeling/
+│   ├── james-metrics-framework/
+│   └── james-team-composition/
+├── install.js                # bin : copie agent + skills vers .claude/
 ├── package.json
 └── README.md
+```
+
+## Dév local
+
+```bash
+git clone https://github.com/nmarijane/james-business.git
+cd james-business
+
+# Test install en sandbox
+HOME=/tmp/james-test node install.js
+
+# Pour modifier une skill : édite skills/<name>/SKILL.md
+# Pour modifier la persona : édite agents/james-business.md
+# Puis bump + publish
+npm version minor
+npm publish
 ```
 
 ## License

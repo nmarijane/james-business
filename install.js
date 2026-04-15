@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * James Business installer — copies the agent file into the user's (or
- * project's) `.claude/agents/` directory and prints next steps for the
- * companion plugin.
+ * James Business installer — copies the agent file and its 5 companion
+ * skills into the user's (or project's) `.claude/` directory.
+ *
+ * Self-contained: no external plugin dependency. Run once, done.
  *
  * Usage:
- *   npx @nmarijane/james-business              # user scope (~/.claude/agents)
- *   npx @nmarijane/james-business --project    # project scope (./.claude/agents)
+ *   npx @nmarijane/james-business              # user scope (~/.claude/)
+ *   npx @nmarijane/james-business --project    # project scope (./.claude/)
  *   npx @nmarijane/james-business --help
  */
 
@@ -20,21 +21,25 @@ const args = process.argv.slice(2);
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`
-James Business — a Claude Code agent for startup / business idea analysis.
+James Business — Claude Code agent + 5 companion skills for startup / business idea analysis.
 
 Usage:
-  npx @nmarijane/james-business             Install at user scope (default)
-  npx @nmarijane/james-business --project   Install at project scope (./.claude)
+  npx @nmarijane/james-business             Install at user scope (~/.claude/)
+  npx @nmarijane/james-business --project   Install at project scope (./.claude/)
   npx @nmarijane/james-business --help      Show this help
 
-After install, add the companion plugin in Claude Code:
-  /plugin marketplace add claude-code-workflows
-  /plugin install startup-business-analyst@claude-code-workflows
+What gets installed:
+  .claude/agents/james-business.md
+  .claude/skills/james-market-sizing/SKILL.md
+  .claude/skills/james-competitive-landscape/SKILL.md
+  .claude/skills/james-financial-modeling/SKILL.md
+  .claude/skills/james-metrics-framework/SKILL.md
+  .claude/skills/james-team-composition/SKILL.md
 `);
   process.exit(0);
 }
 
-// ── Color helpers (ANSI, skipped if output is piped) ─────────────────────
+// ── Color helpers ────────────────────────────────────────────────────────
 const tty = process.stdout.isTTY;
 const green = (s) => (tty ? `\x1b[32m${s}\x1b[0m` : s);
 const gray = (s) => (tty ? `\x1b[90m${s}\x1b[0m` : s);
@@ -43,94 +48,98 @@ const yellow = (s) => (tty ? `\x1b[33m${s}\x1b[0m` : s);
 
 // ── Resolve target directory ─────────────────────────────────────────────
 const projectScope = args.includes("--project");
-const targetDir = projectScope
-  ? path.resolve(process.cwd(), ".claude", "agents")
-  : path.join(os.homedir(), ".claude", "agents");
+const claudeRoot = projectScope
+  ? path.resolve(process.cwd(), ".claude")
+  : path.join(os.homedir(), ".claude");
 
-// ── Copy the agent file ──────────────────────────────────────────────────
+const agentsDir = path.join(claudeRoot, "agents");
+const skillsDir = path.join(claudeRoot, "skills");
+
 try {
-  fs.mkdirSync(targetDir, { recursive: true });
+  fs.mkdirSync(agentsDir, { recursive: true });
+  fs.mkdirSync(skillsDir, { recursive: true });
 } catch (err) {
-  console.error(`✗ Cannot create ${targetDir}: ${err.message}`);
+  console.error(`✗ Cannot create directories under ${claudeRoot}: ${err.message}`);
   process.exit(1);
 }
 
+// ── Copy the agent ───────────────────────────────────────────────────────
 const sourceAgent = path.join(__dirname, "agents", "james-business.md");
-const destAgent = path.join(targetDir, "james-business.md");
+const destAgent = path.join(agentsDir, "james-business.md");
 
 if (!fs.existsSync(sourceAgent)) {
-  console.error(`✗ Source file missing: ${sourceAgent}`);
+  console.error(`✗ Source agent missing: ${sourceAgent}`);
   process.exit(1);
 }
 
-const destExists = fs.existsSync(destAgent);
+const agentExisted = fs.existsSync(destAgent);
 fs.copyFileSync(sourceAgent, destAgent);
 
-if (destExists) {
-  console.log(
-    `${yellow("↻")} James Business updated at ${gray(destAgent)}`,
-  );
-} else {
-  console.log(
-    `${green("✓")} James Business installed at ${gray(destAgent)}`,
-  );
-}
-console.log();
-
-// ── Detect companion plugin ──────────────────────────────────────────────
-const pluginsConfigPath = path.join(
-  os.homedir(),
-  ".claude",
-  "plugins",
-  "installed_plugins.json",
+console.log(
+  (agentExisted ? yellow("↻") : green("✓")) +
+    ` agent    ${gray(destAgent.replace(os.homedir(), "~"))}`,
 );
 
-let pluginInstalled = false;
-try {
-  const raw = fs.readFileSync(pluginsConfigPath, "utf8");
-  const parsed = JSON.parse(raw);
-  pluginInstalled = Object.keys(parsed.plugins || {}).some((k) =>
-    k.startsWith("startup-business-analyst@"),
-  );
-} catch {
-  // File absent or unparseable — treat as not installed.
+// ── Copy the skills ──────────────────────────────────────────────────────
+const sourceSkillsDir = path.join(__dirname, "skills");
+if (!fs.existsSync(sourceSkillsDir)) {
+  console.error(`✗ Source skills directory missing: ${sourceSkillsDir}`);
+  process.exit(1);
 }
 
-if (pluginInstalled) {
-  console.log(
-    `${green("✓")} Companion plugin ${bold(
-      "startup-business-analyst",
-    )} detected. You're ready.`,
-  );
-  console.log();
-  console.log(gray("Invoke James from Claude Code:"));
-  console.log(
-    `  ${bold(
-      'Agent({ subagent_type: "James Business", prompt: "Analyse mon idée: ..." })',
-    )}`,
-  );
-} else {
-  console.log(gray("─".repeat(60)));
-  console.log(bold("Next step — install the companion plugin"));
-  console.log(
-    gray(
-      "  James invokes structured skills (market sizing, competitive analysis,",
-    ),
-  );
-  console.log(
-    gray(
-      "  financial modeling) from this plugin. Without it he falls back to",
-    ),
-  );
-  console.log(gray("  web-search only (signals it explicitly)."));
-  console.log();
-  console.log("  In Claude Code, run:");
-  console.log();
-  console.log(`    ${bold("/plugin marketplace add claude-code-workflows")}`);
-  console.log(
-    `    ${bold(
-      "/plugin install startup-business-analyst@claude-code-workflows",
-    )}`,
-  );
-  console.log();
+const skillNames = fs
+  .readdirSync(sourceSkillsDir)
+  .filter((name) => {
+    const skillPath = path.join(sourceSkillsDir, name);
+    return (
+      fs.statSync(skillPath).isDirectory() &&
+      fs.existsSync(path.join(skillPath, "SKILL.md"))
+    );
+  })
+  .sort();
+
+for (const skillName of skillNames) {
+  const srcSkillDir = path.join(sourceSkillsDir, skillName);
+  const destSkillDir = path.join(skillsDir, skillName);
+
+  fs.mkdirSync(destSkillDir, { recursive: true });
+
+  for (const file of fs.readdirSync(srcSkillDir)) {
+    const srcFile = path.join(srcSkillDir, file);
+    const destFile = path.join(destSkillDir, file);
+    if (fs.statSync(srcFile).isFile()) {
+      const existed = fs.existsSync(destFile);
+      fs.copyFileSync(srcFile, destFile);
+      const icon = existed ? yellow("↻") : green("✓");
+      console.log(
+        `${icon} skill    ${gray(
+          path
+            .join(destSkillDir, file)
+            .replace(os.homedir(), "~"),
+        )}`,
+      );
+    }
+  }
 }
+
+console.log();
+console.log(gray("─".repeat(60)));
+console.log(
+  `${bold("James Business")} + ${bold(
+    String(skillNames.length),
+  )} companion skills installed.`,
+);
+console.log();
+console.log(gray("Scope: ") + (projectScope ? "project" : "user (global)"));
+console.log();
+console.log(gray("Invoke from Claude Code:"));
+console.log(
+  `  ${bold(
+    'Agent({ subagent_type: "James Business", prompt: "Analyse mon idée : ..." })',
+  )}`,
+);
+console.log();
+console.log(
+  gray("Or just: ") + bold("@James Business analyse mon idée : ..."),
+);
+console.log();

@@ -1,0 +1,8 @@
+# Dev files
+.gitignore
+.DS_Store
+node_modules/
+*.log
+.npm
+*.tgz
+# README + package.json are auto-included by npm; no need to exclude them.

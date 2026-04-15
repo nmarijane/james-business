@@ -1,0 +1,41 @@
+{
+  "name": "@nmarijane/james-business",
+  "version": "1.0.0",
+  "description": "James Business — a French-speaking co-founder / business analyst agent for Claude Code. Analyzes startup ideas with TAM/SAM/SOM, Porter's Five Forces, financial modeling and other structured frameworks via the startup-business-analyst companion plugin.",
+  "type": "commonjs",
+  "bin": {
+    "james-business": "./install.js"
+  },
+  "files": [
+    "install.js",
+    "agents/"
+  ],
+  "keywords": [
+    "claude-code",
+    "claude",
+    "agent",
+    "subagent",
+    "business-analyst",
+    "startup",
+    "co-founder",
+    "business",
+    "french",
+    "français"
+  ],
+  "author": "nmarijane",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nmarijane/james-business.git"
+  },
+  "homepage": "https://github.com/nmarijane/james-business#readme",
+  "bugs": {
+    "url": "https://github.com/nmarijane/james-business/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

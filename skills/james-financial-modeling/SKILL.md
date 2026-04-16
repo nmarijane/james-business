@@ -1,7 +1,7 @@
 ---
 name: james-financial-modeling
 description: Construit un modèle financier 3-5 ans pour une startup early-stage — revenue projection par cohorte, coûts, burn, runway, scénarios base/upside/downside, sizing d'une levée. À utiliser pour préparer un pitch investor, calculer le runway, sizer une seed ou une Series A. Déclencheurs typiques — "financial model", "projections", "burn rate", "runway", "combien lever", "3 year plan", "P&L startup".
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Financial Modeling — Startup Early-Stage
@@ -218,6 +218,19 @@ Hypothèses sensibles à auditer
   1. {la plus fragile + comment la valider}
   2. {...}
 ```
+
+## Skills liés
+
+Un modèle financier isolé des autres analyses dérive vite. Il doit s'ancrer sur :
+
+- **`james-metrics-framework`** — les hypothèses clés (**ARPU, NRR, Gross Margin, CAC Payback, Monthly Churn**) doivent venir de `metrics-framework` si déjà défini pour ce produit. Sinon utiliser les benchmarks du skill comme fallback, **en le signalant explicitement** dans les hypothèses sensibles.
+- **`james-market-sizing`** — le revenue Y1-Y2 du scénario base ne doit **jamais dépasser le SOM** de `market-sizing`. Si c'est le cas, soit le SOM est trop conservateur (refaire), soit le modèle fait du wishful thinking (corriger).
+- **`james-team-composition`** — le line item "salaires" de l'Opex doit matcher **exactement** le hiring plan de `team-composition` (même headcount, même séquence, même fully-loaded cost par tête). Si l'un dit 6 ingés et l'autre 3, les deux sont incohérents.
+- **`james-competitive-landscape`** — l'**ARPU** modélisé doit se tenir dans la fourchette des prix concurrents identifiée par `competitive-landscape`. Pricing 3× au-dessus du marché = à justifier par le positionnement, pas à assumer.
+
+## Outils requis
+
+Pas de dépendance externe bloquante. **`WebSearch`** est utile pour vérifier des benchmarks récents (OpenView SaaS Benchmarks, SaaStr, Bessemer) ou la comp réelle d'une région mais le skill fonctionne en autonome avec les tables embarquées.
 
 ## Règles absolues
 

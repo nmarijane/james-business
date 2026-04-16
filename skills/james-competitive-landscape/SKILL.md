@@ -1,7 +1,7 @@
 ---
 name: james-competitive-landscape
 description: Analyse concurrentielle rigoureuse avec Porter's Five Forces, Blue Ocean Strategy, positioning maps et scan stratégique (GitHub, Product Hunt, HN, Reddit). À utiliser pour évaluer les concurrents, identifier le positionnement, défendre un moat, ou préparer un pitch investor. Déclencheurs typiques — "concurrence", "competitive landscape", "positionnement", "Porter", "Blue Ocean", "moat", "qui fait déjà ça".
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Competitive Landscape
@@ -187,6 +187,17 @@ Verdict stratégique
   Comment gagner : {1-2 phrases sur le moat à construire}
   Where NOT to play : {segments à éviter}
 ```
+
+## Outils requis
+
+Ce skill dépend de **`WebSearch`** (et `WebFetch` pour ouvrir fiches G2, pages produit, posts HN) pour le scan stratégique de l'étape 1 (Google, Product Hunt, HN, Reddit, G2, Crunchbase, LinkedIn, GitHub). Sans ces outils, le skill tourne à vide : le signaler et demander à l'utilisateur de fournir la liste de concurrents manuellement avant d'appliquer Porter / Blue Ocean / positioning.
+
+## Skills liés
+
+- **`james-market-sizing`** — la position "niche vs généraliste" sur la positioning map doit être cohérente avec le **SAM** ciblé. Viser 1% d'un marché généraliste vs 30% d'une niche = deux stratégies différentes, deux sizings différents.
+- **`james-financial-modeling`** — le **pricing des concurrents** identifiés à l'étape 1 borne l'**ARPU** plausible du modèle financier. Un ARPU 3× supérieur au marché doit être explicitement justifié par le positionnement (segment premium, value-based pricing).
+- **`james-team-composition`** — le **moat identifié à l'étape 5** dicte les priorités de hire. Moat "tech / data" → ingés seniors + data en priorité. Moat "brand / distribution" → marketing + growth. Moat "switching cost" → CS + product. La contrainte équipe suit le moat, pas l'inverse.
+- **`james-metrics-framework`** — si les concurrents ont des métriques publiques (investor updates, S-1, blogposts de CEO), les utiliser comme **benchmarks spécifiques** dans `metrics-framework` à la place des génériques.
 
 ## Règles absolues
 

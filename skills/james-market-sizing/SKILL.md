@@ -1,7 +1,7 @@
 ---
 name: james-market-sizing
 description: Calcule le TAM/SAM/SOM d'un marché avec trois méthodologies (top-down, bottom-up, value theory). À utiliser pour sizer un marché, valider une opportunité business, préparer un pitch investor ou défendre un business plan. Déclencheurs typiques — "TAM", "SAM", "SOM", "taille du marché", "market sizing", "opportunité de marché", "combien ça vaut ce marché".
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Market Sizing — TAM / SAM / SOM
@@ -127,6 +127,18 @@ SOM (Serviceable Obtainable Market)
 Sources citées : {liste}
 Hypothèses sensibles : {liste de ce qui pourrait casser le sizing}
 ```
+
+## Outils requis
+
+Ce skill dépend de **`WebSearch`** (et `WebFetch` pour ouvrir un rapport précis) pour alimenter les sources (Statista, Gartner, INSEE, Eurostat, Crunchbase…). Si ces outils ne sont pas disponibles, le skill doit le signaler explicitement en tête de sortie — les chiffres deviennent des estimations non-sourcées à flagger comme tel.
+
+## Skills liés
+
+Ce sizing n'est presque jamais autonome. Il s'articule avec :
+
+- **`james-financial-modeling`** — le **SOM année 1-2** donne la fourchette de revenue réaliste pour le scénario base case. Règle : `Revenue Y1-Y2 du modèle financier ≤ SOM`. Si le modèle rêve au-delà, c'est le modèle qui a tort, pas le SOM.
+- **`james-metrics-framework`** — la taille du SAM influence le choix de la **North Star Metric**. Un marché niche (SAM 100M€) et un marché de masse (SAM 10B€) n'ont ni la même échelle ni les mêmes signaux de PMF.
+- **`james-competitive-landscape`** — si le SOM paraît petit relatif au SAM, ne pas conclure "marché saturé" sans invoquer `competitive-landscape` pour tester l'hypothèse via Porter (intensité concurrentielle réelle) et Blue Ocean (zones vides exploitables).
 
 ## Règles absolues
 

@@ -1,7 +1,7 @@
 ---
 name: james-team-composition
 description: Dimensionne l'équipe d'une startup early-stage par stade (pre-seed → Series A), avec roles prioritaires, fourchettes de compensation (Paris, remote EU, SF), equity ranges, et budget aligné sur les milestones de revenu. À utiliser pour planifier les hires, sizer un hiring plan post-levée, décider qui recruter après, ou construire un budget équipe. Déclencheurs typiques — "team", "hiring plan", "headcount", "equity", "comp", "salaires", "org chart", "premiers hires".
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Team Composition — Startup Early-Stage
@@ -202,6 +202,19 @@ Equity pool à allouer
   % à grant sur les 12 prochains mois : {X%}
   Sources : {dilution pool existant ou top-up à la prochaine levée}
 ```
+
+## Skills liés
+
+Un hiring plan isolé du financier ou de la stratégie = crame du cash pour rien. S'ancrer sur :
+
+- **`james-financial-modeling`** — le **burn équipe** calculé ici doit matcher **exactement** le line item "Opex headcount" du modèle financier (même headcount mois par mois, même fully-loaded cost par région). Si les deux divergent, l'un des deux doit se recaler — en général, c'est le modèle financier qui a sous-estimé les salaires ou le hiring plan qui a oublié des charges.
+- **`james-metrics-framework`** — la **contrainte actuelle** (étape 1) se diagnostique via les métriques. Churn élevé → contrainte rétention, CAC qui monte → contrainte GTM, activation faible → contrainte product, velocity eng faible → contrainte tech. Demander `metrics-framework` en amont si les contraintes ne sont pas évidentes.
+- **`james-competitive-landscape`** — le **moat à construire** (étape 5 de `competitive-landscape`) dicte l'ordre des hires. Moat "data" → eng + data scientists. Moat "distribution" → growth + sales. Moat "switching cost" → CS + product. Moat "brand" → marketing + design. Ne jamais hire sans savoir quel moat on construit.
+- **`james-market-sizing`** — la **taille du SAM** borne l'équipe cible. Un SAM de 50M€ ne supporte pas une équipe de 30 personnes à Series A — le revenue per employee ne peut pas suivre.
+
+## Outils requis
+
+Pas de dépendance externe bloquante. **`WebSearch`** utile pour vérifier les comp ranges locales 2026 (Glassdoor, LinkedIn Salary, Apec, Levels.fyi) — les tables embarquées doivent être actualisées périodiquement.
 
 ## Règles absolues
 

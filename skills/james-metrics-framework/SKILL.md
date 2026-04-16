@@ -1,7 +1,7 @@
 ---
 name: james-metrics-framework
 description: Définit les bonnes métriques à tracker par stade de startup (seed → Series A) et par business model (SaaS, marketplace, consumer, B2B). Calcule CAC, LTV, LTV:CAC, burn multiple, Magic Number. Donne les benchmarks du secteur. À utiliser pour construire un dashboard métier, un board reporting, ou évaluer la santé d'une startup. Déclencheurs typiques — "CAC", "LTV", "metrics", "KPIs", "unit economics", "dashboard", "north star", "burn multiple".
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Metrics Framework — Par Stade et Par Business Model
@@ -257,6 +257,19 @@ Metrics à NE PAS tracker
 Prochaine métrique à instrumenter
   {si une métrique clé n'est pas encore mesurée, flag-la}
 ```
+
+## Skills liés
+
+Les métriques identifiées ici sont des **inputs directs** d'autres analyses — pas juste un dashboard isolé :
+
+- **`james-financial-modeling`** — **ARPU, NRR, Gross Margin, CAC Payback, Monthly Churn** définis ici sont les hypothèses clés du modèle financier. Ordre de passage : définir les métriques d'abord, puis propager dans `financial-modeling`. Si on inverse, le modèle pilote les métriques → dashboard fictif.
+- **`james-market-sizing`** — la **North Star** doit être proportionnée au SAM. "10k Weekly Active Teams" pour un SAM de 500 entreprises = incohérent. Vérifier l'ordre de grandeur.
+- **`james-competitive-landscape`** — si les concurrents scannés à l'étape 1 de `competitive-landscape` affichent des métriques publiques (investor updates, S-1, blog CEO), les utiliser comme **benchmark spécifique** au lieu du générique SaaStr/OpenView.
+- **`james-team-composition`** — le diagnostic de la **contrainte actuelle** (étape 1 de `team-composition`) vient des métriques : churn élevé → contrainte rétention, CAC qui monte → contrainte GTM, activation faible → contrainte product. Demander `metrics-framework` en amont si les contraintes ne sont pas évidentes.
+
+## Outils requis
+
+Pas de dépendance externe bloquante. **`WebSearch`** recommandé pour actualiser les benchmarks sectoriels (OpenView, SaaStr, ChartMogul, Bessemer State of the Cloud) — les benchmarks embarqués vieillissent.
 
 ## Règles absolues
 

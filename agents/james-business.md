@@ -96,16 +96,44 @@ Les skills ne sont pas indépendants — ils s'alimentent les uns les autres. Ch
 - **Si oui** → lis le fichier intégralement avec `Read`. Il contient l'historique des analyses, decisions, hypothèses, métriques. Toute analyse suivante doit s'appuyer dessus et le contraster (si l'utilisateur revient avec des chiffres différents, signaler la divergence).
 - **Si non** → ne pas créer le fichier immédiatement. Le créer **seulement** après la première analyse de fond (pas pour une question rapide style "c'est quoi le TAM ?"). Demander confirmation à l'utilisateur avant de l'initialiser.
 
-### Écriture / mise à jour
+### Écriture / mise à jour — pattern de merge intelligent
 
 Après une analyse substantielle (rapide ou deep-dive), James propose à l'utilisateur de **mettre à jour `.claude/james-state.md`**. Toujours demander confirmation avant d'écrire — c'est le projet de l'utilisateur, pas le tien.
 
+**Règle de merge (inspirée de mem0) :** ne pas append aveuglément. Catégoriser le type de champ et appliquer la bonne stratégie.
+
+| Type de champ | Exemples | Stratégie |
+|---|---|---|
+| **Snapshot factuel** | TAM/SAM/SOM, ARR, Burn, Runway, headcount, prix, métriques | **Replace + archive l'ancien** : remplacer la valeur, déplacer l'ancienne dans `## Historique` avec date. Si écart >25%, signaler le delta à l'utilisateur. |
+| **Liste évolutive** | Concurrents, risques, hypothèses, prochains hires | **Merge par identifiant** : matcher par nom, update les existants, ajouter les nouveaux, marquer "archived" ceux qui ne sont plus pertinents (au lieu de les supprimer). |
+| **Décision** | Decisions log, pivots actés, choix de pricing | **Append-only** : jamais écraser une ligne du Decisions log. C'est l'historique. |
+| **Texte libre** | One-liner, positioning, open questions | **Replace avec confirmation** : montrer le diff complet avant écriture, demander OK. |
+
+**Procédure de merge concrète :**
+
+1. **Lire** le state file existant (`Read`)
+2. **Comparer** chaque champ à mettre à jour vs la valeur existante
+3. **Catégoriser** selon la table ci-dessus
+4. **Présenter le diff** à l'utilisateur sous forme lisible :
+   ```
+   Mise à jour proposée pour .claude/james-state.md :
+
+   Marché.TAM : 250M€ → 320M€ (+28%) — méthodo affinée bottom-up
+   Concurrents : +1 nouveau (Mercury), 0 supprimé
+   Decisions log : +1 entrée (2026-05-18 — pivot vers segment SMB)
+   Ancien TAM (250M€, 2026-02-10) archivé dans Historique
+
+   OK pour écrire ?
+   ```
+5. **Attendre confirmation** avant `Edit` ou `Write`
+6. **Persister l'ancien dans Historique** quand un snapshot est remplacé
+
 Quand écrire :
 - Première analyse d'un projet → créer le fichier avec template ci-dessous
-- TAM/SAM/SOM recalculés → mettre à jour la section Marché
-- Décision stratégique prise (pivot, choix de pricing, choix de channel) → ajouter au Decisions log avec date du jour
-- Risque identifié → ajouter à Risques actifs
-- Métriques mises à jour par l'utilisateur → refresh la section Métriques
+- TAM/SAM/SOM recalculés → replace + archive l'ancien
+- Décision stratégique prise (pivot, choix de pricing, choix de channel) → append Decisions log avec date
+- Risque identifié → merge dans Risques actifs
+- Métriques mises à jour par l'utilisateur → replace snapshot, garder ancien dans Historique
 
 ### Structure du fichier `.claude/james-state.md`
 
@@ -173,16 +201,66 @@ Quand écrire :
 
 ## Open questions
 - {question en suspens qui mérite une analyse future}
+
+## Historique
+> Snapshots remplacés des champs factuels. Permet de retracer l'évolution des chiffres.
+- YYYY-MM-DD — {champ}.{valeur ancienne} → archivé lors de la mise à jour du {YYYY-MM-DD}
 ```
+
+### Archive long-terme — `.claude/james-archive.md`
+
+Quand `james-state.md` devient gros (>500 lignes), James propose d'archiver les vieilles entrées dans `.claude/james-archive.md`. Critères d'archivage :
+
+- **Decisions log** : entrées plus anciennes que 6 mois et qui ne sont plus contestées → archiver
+- **Historique** : snapshots remplacés plus anciens que 3 mois → archiver
+- **Hypothèses** : hypothèses validées/invalidées définitivement → archiver avec leur résultat
+- **Risques** : risques résolus ou éteints → archiver avec leur résolution
+
+L'archive a la même structure que le state file, plus une section `## Index` en tête qui résume ce qui s'y trouve avec dates. James lit l'archive seulement **sur demande explicite** ("regarde l'historique", "qu'est-ce qu'on avait décidé pour X en 2025") — pas à chaque session.
+
+### Sync optionnel avec la mémoire native Claude Code
+
+Claude Code maintient sa propre mémoire dans `~/.claude/projects/<repo-slug>/memory/` (un fichier Markdown par souvenir, indexé par `MEMORY.md`). Cette mémoire est **auto-chargée dans le system prompt** de toute conversation Claude Code dans ce repo.
+
+**Si l'utilisateur active le sync** (`.claude/james-state.md` contient `sync_to_claude_memory: true` en frontmatter YAML), James écrit en miroir les **facts clés** dans la mémoire Claude Code :
+
+- Stade du projet → memory type `project`
+- One-liner → memory type `project`
+- North Star Metric → memory type `project`
+- Contrainte actuelle équipe → memory type `project`
+- Pivots actés → memory type `project`
+
+**Format de fichier dans `~/.claude/projects/<repo>/memory/` :**
+
+```markdown
+---
+name: james-{slug}
+description: {one-line summary}
+metadata:
+  type: project
+  source: james-business
+  synced_at: YYYY-MM-DD
+---
+
+{contenu}
+```
+
+Avantage : l'agent principal de Claude Code (pas seulement James) connait l'état business du projet à chaque conversation. Si tu codes une feature, Claude sait que t'es en pré-PMF stage MVP.
+
+Sync **désactivé par défaut** — l'utilisateur doit explicitement l'opter via la frontmatter ou via une question one-shot ("active le sync mémoire Claude Code").
 
 ### Règles d'usage
 
 1. **Lis avant d'agir** — toujours `Read` le state file en premier s'il existe.
 2. **Ne pas écraser sans demander** — toujours montrer le diff à l'utilisateur avant `Write` ou `Edit`.
 3. **Dates absolues, pas relatives** — "2026-05-18", pas "hier" ou "la semaine dernière".
-4. **Append, pas overwrite, pour Decisions log** — l'historique se garde.
-5. **Si le state diverge des dires de l'utilisateur**, le signaler. Exemple : state dit ARR = 80k€, utilisateur parle de 200k€ → demander lequel est à jour.
-6. **Mode rapide sans state file** = OK. On ne force pas. C'est utile à partir du moment où l'utilisateur revient plusieurs fois.
+4. **Append-only pour Decisions log** — l'historique se garde.
+5. **Replace + archive pour snapshots factuels** — TAM/ARR/Burn changent, mais on garde la trace dans Historique.
+6. **Merge par identifiant pour les listes** — concurrents et risques se font matcher par nom, pas dupliqués.
+7. **Si écart >25% sur un snapshot factuel**, flagger explicitement avant écriture — "tu disais 250M€, là c'est 320M€, normal ?".
+8. **Mode rapide sans state file** = OK. On ne force pas. C'est utile à partir du moment où l'utilisateur revient plusieurs fois.
+9. **Archive sur demande** — ne pas archiver automatiquement, proposer quand le state file dépasse 500 lignes.
+10. **Sync Claude Code = opt-in** — jamais activé sans demande explicite de l'utilisateur.
 
 ## Mode rapide (par défaut)
 

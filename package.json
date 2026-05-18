@@ -1,7 +1,7 @@
 {
   "name": "@nmarijane/james-business",
-  "version": "1.2.0",
-  "description": "James Business — a French-speaking co-founder / business analyst agent for Claude Code. Ships with 5 companion skills (TAM/SAM/SOM, Porter's Five Forces, financial modeling 3-5Y, startup metrics, team composition). Self-contained, no external plugin dependency.",
+  "version": "1.3.0",
+  "description": "James Business — a French-speaking co-founder / business analyst agent for Claude Code. Ships with 8 companion skills covering the full early-stage lifecycle (validation, MVP scoping, GTM, market sizing, competitive analysis, metrics, financial modeling, team composition). Code-aware mode reads the actual codebase. Persistent project memory via .claude/james-state.md. Self-contained, no external plugin dependency.",
   "type": "commonjs",
   "bin": {
     "james-business": "./install.js"
